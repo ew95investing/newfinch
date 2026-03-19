@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FINCH v46 — 诚实市场参考</title>
+<style>
+/* ===== 极简风格 CSS ===== */
+:root {
+  --bg: #F5F3F0;
+  --bg-card: #FFFFFF;
+  --text: #1A1A1A;
+  --text-dim: #666666;
+  --gold: #B8860B;
+  --green: #2E7D32;
+  --red: #C62828;
+  --amber: #BF6F00;
+  --blue: #1565C0;
+  --border: #E0E0E0;
+  --shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  padding: 20px;
+}
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 280px 1fr 320px;
+  gap: 16px;
+}
+
+/* ===== 通用组件 ===== */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow);
+}
+.section-title {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.value-large {
+  font-size: 28px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.value-medium {
+  font-size: 18px;
+  font-weight: 500;
+}
+.text-green { color: var(--green); }
+.text-red { color: var(--red); }
+.text-amber { color: var(--amber); }
+.text-dim { color: var(--text-dim); }
+
+/* ===== 数据可信度条 ===== */
+.trust-meter {
+  height: 6px;
+  background: #E0E0E0;
+  border-radius: 3px;
+  margin: 8px 0;
+  overflow: hidden;
+}
+.trust-fill {
+  height: 100%;
+  background: var(--gold);
+  transition: width 0.3s;
+}
+.trust-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.trust-good { background: rgba(46, 125, 50, 0.1); color: var(--green); }
+.trust-degraded { background: rgba(191, 111, 0, 0.1); color: var(--amber); }
+.trust-bad { background: rgba(198, 40, 40, 0.1); color: var(--red); }
+
+/* ===== 宏观状态徽章 ===== */
+.regime-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.regime-strong-bull { background: rgba(46, 125, 50, 0.15); color: var(--green); }
+.regime-bull { background: rgba(46, 125, 50, 0.08); color: var(--green); }
+.regime-neutral { background: rgba(102, 102, 102, 0.1); color: var(--text-dim); }
+.regime-bear { background: rgba(198, 40, 40, 0.08); color: var(--red); }
+.regime-strong-bear { background: rgba(198, 40, 40, 0.15); color: var(--red); }
+
+/* ===== 最终建议卡片 ===== */
+.final-advice {
+  border-left: 4px solid;
+  padding: 12px 16px;
+  background: rgba(0,0,0,0.02);
+  border-radius: 0 8px 8px 0;
+  margin: 16px 0;
+}
+.advice-action {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.advice-reason {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+.advice-position {
+  font-size: 14px;
+  font-weight: 500;
+}
+.position-bar {
+  height: 8px;
+  background: #E0E0E0;
+  border-radius: 4px;
+  margin: 8px 0;
+  overflow: hidden;
+}
+.position-fill {
+  height: 100%;
+  background: var(--gold);
+  transition: width 0.3s;
+}
+
+/* ===== 免责声明 ===== */
+.disclaimer {
+  font-size: 11px;
+  color: var(--text-dim);
+  padding: 12px;
+  background: rgba(0,0,0,0.02);
+  border-radius: 6px;
+  line-height: 1.6;
+  border: 1px solid var(--border);
+}
+</style>
+</head>
+<body>
+
+<!-- ===== 顶部横幅：永远诚实的提醒 ===== -->
+<div style="background: #1A1A1A; color: white; padding: 8px 20px; margin-bottom: 20px; border-radius: 4px; font-size: 13px; text-align: center;">
+  ⚖️ FINCH v46 — 基于免费API · 仅限日线及以上周期 · 不构成投资建议 · 不懂不做
+</div>
+
+<div class="container">
+
+<!-- ===== 左侧面板：品种选择 + 基础数据 ===== -->
+<div class="left-panel">
+  <div class="card">
+    <div class="section-title">📌 品种选择</div>
+    <div style="margin-bottom: 12px;">
+      <select id="symbolSelect" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px;">
+        <optgroup label="🪙 加密货币">
+          <option value="BTCUSDT">BTC/USDT (比特币)</option>
+          <option value="ETHUSDT">ETH/USDT (以太坊)</option>
+          <option value="SOLUSDT">SOL/USDT (索拉纳)</option>
+        </optgroup>
+        <optgroup label="🥇 贵金属">
+          <option value="XAU/USD">XAU/USD (黄金)</option>
+          <option value="XAG/USD">XAG/USD (白银)</option>
+        </optgroup>
+        <optgroup label="💱 外汇">
+          <option value="USD/SGD">USD/SGD (美元/新元)</option>
+          <option value="SGD/MYR">SGD/MYR (新元/令吉)</option>
+        </optgroup>
+        <optgroup label="🛢️ 原油">
+          <option value="WTI/USD">WTI/USD (西德州原油)</option>
+        </optgroup>
+      </select>
+    </div>
+    
+    <!-- 实时价格 (仅当数据可信时显示) -->
+    <div id="priceDisplay" style="text-align: center; margin: 16px 0;">
+      <div class="text-dim" style="font-size: 12px;">最新价格</div>
+      <div class="value-large" id="priceValue">--</div>
+      <div style="font-size: 14px;" id="priceChange">--</div>
+    </div>
+    
+    <!-- 数据可信度指示器 -->
+    <div id="trustIndicator">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+        <span class="text-dim" style="font-size: 12px;">数据可信度</span>
+        <span id="trustScore" style="font-size: 12px; font-weight: 600;">--</span>
+      </div>
+      <div class="trust-meter">
+        <div class="trust-fill" id="trustBar" style="width: 0%"></div>
+      </div>
+      <div id="trustBadge" class="trust-badge" style="margin-top: 8px;">--</div>
+      <div id="trustIssues" style="font-size: 11px; color: var(--red); margin-top: 8px;"></div>
+    </div>
+  </div>
+  
+  <!-- 免责声明精简版 -->
+  <div class="disclaimer" style="font-size: 10px;">
+    <strong>⚠️ 重要提醒</strong><br>
+    1. 基于免费API，数据可能有2-24小时延迟<br>
+    2. 所有分析仅适用于日线及以上周期<br>
+    3. 不包含任何玄学/占星内容<br>
+    4. 看不懂的品种请不要交易
+  </div>
+</div>
+
+<!-- ===== 中间面板：核心分析 ===== -->
+<div class="main-panel">
+  <!-- 宏观状态卡 -->
+  <div class="card">
+    <div class="section-title">🌍 宏观状态 (日线/周线)</div>
+    <div id="macroDisplay">
+      <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+        <span id="regimeBadge" class="regime-badge">--</span>
+        <span id="regimeConfidence" class="text-dim" style="font-size: 13px;">置信度 --</span>
+      </div>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px;">
+        <div>
+          <div class="text-dim" style="font-size: 11px; margin-bottom: 4px;">价格 vs MA200</div>
+          <div id="ma200Status" style="font-size: 15px; font-weight: 500;">--</div>
+        </div>
+        <div>
+          <div class="text-dim" style="font-size: 11px; margin-bottom: 4px;">波动率 (年化)</div>
+          <div id="volatility" style="font-size: 15px; font-weight: 500;">--</div>
+        </div>
+        <div>
+          <div class="text-dim" style="font-size: 11px; margin-bottom: 4px;">市场宽度</div>
+          <div id="breadth" style="font-size: 15px; font-weight: 500;">--</div>
+        </div>
+        <div>
+          <div class="text-dim" style="font-size: 11px; margin-bottom: 4px;">趋势强度</div>
+          <div id="trendStrength" style="font-size: 15px; font-weight: 500;">--</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 微观信号卡 -->
+  <div class="card">
+    <div class="section-title">🔍 微观信号 (仅限可靠模式)</div>
+    <div id="microDisplay">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+        <div>
+          <div class="text-dim" style="font-size: 11px;">RSI 14</div>
+          <div id="rsiValue" style="font-size: 24px; font-weight: 500;">--</div>
+        </div>
+        <div>
+          <div class="text-dim" style="font-size: 11px;">成交量比率</div>
+          <div id="volumeRatio" style="font-size: 24px; font-weight: 500;">--</div>
+        </div>
+      </div>
+      
+      <div style="background: rgba(0,0,0,0.02); padding: 12px; border-radius: 6px;">
+        <div class="text-dim" style="font-size: 11px; margin-bottom: 8px;">关键位测试</div>
+        <div id="keyLevels" style="font-size: 13px;">--</div>
+      </div>
+      
+      <div id="microSignal" style="margin-top: 16px; padding: 8px 12px; border-radius: 6px; font-size: 13px; background: rgba(0,0,0,0.02);">
+        <span id="microSignalText">无明确信号</span>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 支撑阻力卡 -->
+  <div class="card">
+    <div class="section-title">📊 关键价格区</div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+      <div>
+        <div class="text-dim" style="font-size: 11px;">主要阻力</div>
+        <div id="resistance" class="value-medium text-red">--</div>
+        <div id="resistanceNote" style="font-size: 11px; color: var(--text-dim); margin-top: 4px;"></div>
+      </div>
+      <div>
+        <div class="text-dim" style="font-size: 11px;">主要支撑</div>
+        <div id="support" class="value-medium text-green">--</div>
+        <div id="supportNote" style="font-size: 11px; color: var(--text-dim); margin-top: 4px;"></div>
+      </div>
+    </div>
+    <div style="margin-top: 16px;">
+      <div class="text-dim" style="font-size: 11px; margin-bottom: 4px;">当前价格位置</div>
+      <div id="pricePosition" style="font-size: 13px;">--</div>
+    </div>
+  </div>
+  
+  <!-- 最终建议卡 (唯一输出) -->
+  <div class="card" style="border: 2px solid var(--gold);">
+    <div class="section-title" style="color: var(--gold);">🎯 FINCH 最终建议</div>
+    <div id="finalAdvice" class="final-advice" style="border-left-color: var(--gold);">
+      <div class="advice-action" id="adviceAction">等待</div>
+      <div class="advice-reason" id="adviceReason">数据加载中...</div>
+      <div class="advice-position" id="advicePosition"></div>
+      <div class="position-bar" style="margin-top: 12px;">
+        <div class="position-fill" id="positionBar" style="width: 0%"></div>
+      </div>
+    </div>
+    
+    <!-- 长期视角提醒 (段永平风格) -->
+    <div style="margin-top: 16px; padding: 12px; background: rgba(184, 134, 11, 0.05); border-radius: 6px; font-size: 12px; font-style: italic;">
+      💡 “如果你看不懂这个品种的长期价值，请忽略以上所有信号。好公司 + 好价格 + 长期持有 = 财富。其他都是噪音。”
+    </div>
+  </div>
+</div>
+
+<!-- ===== 右侧面板：风险 + 学习记录 ===== -->
+<div class="right-panel">
+  <!-- 风险仪表盘 -->
+  <div class="card">
+    <div class="section-title">⚠️ 风险管理</div>
+    <div style="margin-bottom: 16px;">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+        <span class="text-dim">当前建议仓位</span>
+        <span id="riskPosition" style="font-weight: 600;">0%</span>
+      </div>
+      <div class="trust-meter">
+        <div class="trust-fill" id="riskBar" style="width: 0%; background: var(--gold);"></div>
+      </div>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+      <div>
+        <div class="text-dim" style="font-size: 11px;">最大杠杆</div>
+        <div id="maxLeverage" style="font-size: 16px; font-weight: 600;">1×</div>
+      </div>
+      <div>
+        <div class="text-dim" style="font-size: 11px;">单笔上限</div>
+        <div id="maxPosition" style="font-size: 16px; font-weight: 600;">15%</div>
+      </div>
+    </div>
+    
+    <div id="riskWarnings" style="font-size: 12px; color: var(--red);">
+      <!-- 动态风险警告 -->
+    </div>
+  </div>
+  
+  <!-- 学习记录 (轻量级) -->
+  <div class="card">
+    <div class="section-title">📚 学习记录 (最近10笔)</div>
+    <div id="learningLog" style="font-size: 12px;">
+      <div class="text-dim" style="text-align: center; padding: 20px 0;">等待历史数据积累</div>
+    </div>
+  </div>
+  
+  <!-- 完整免责声明 -->
+  <div class="disclaimer">
+    <strong>📌 使用协议</strong><br><br>
+    1. <strong>数据来源</strong>: 免费API (Binance, CoinGecko, Alpha Vantage)，可能存在延迟和不准确<br>
+    2. <strong>适用范围</strong>: 仅限日线(D1)及以上周期，不适用于短线交易<br>
+    3. <strong>分析性质</strong>: 所有分析均为概率判断，不构成投资建议<br>
+    4. <strong>风险提示</strong>: 任何投资决策都可能导致本金损失<br>
+    5. <strong>诚实声明</strong>: 当数据不可靠时，本系统会明确告知“无法分析”
+  </div>
+</div>
+
+</div>
+
+<script>
+// ===========================================
+// FINCH v46 — 终极诚实版
+// 核心哲学: 诚实 > 复杂, 宏观 > 微观, 数据质量 > 信号数量
+// ===========================================
+
+(function() {
+  'use strict';
+
+  // ===== 全局状态 =====
+  const STATE = {
+    sym: 'BTCUSDT',
+    price: 0,
+    priceChange: 0,
+    klines: {},
+    macro: {},
+    micro: {},
+    trust: { score: 0, issues: [], isUsable: false },
+    advice: { action: '等待', reason: '初始化中', position: 0 },
+    learning: []
+  };
+
+  // ===== 数据可信度引擎 =====
+  const TrustEngine = {
+    assess(sym, klines, currentPrice) {
+      const issues = [];
+      let score = 1.0;
+      
+      // 1. 是否有K线数据
+      if (!klines || klines.length < 10) {
+        issues.push('K线数据不足');
+        score *= 0.3;
+      }
+      
+      // 2. 数据新鲜度
+      if (klines && klines.length > 0) {
+        const lastBar = klines[klines.length - 1];
+        const barAge = Date.now() - lastBar.t;
+        const maxAge = this._getMaxAge('1d'); // 强制日线
+        
+        if (barAge > maxAge) {
+          const hoursOld = Math.round(barAge / 3600000);
+          issues.push(`数据陈旧: ${hoursOld}小时前`);
+          score *= Math.max(0.3, 1 - (barAge / maxAge) * 0.7);
+        }
+        
+        // 检测模拟数据
+        if (klines._isMock) {
+          issues.push('使用模拟数据(不可靠)');
+          score *= 0.2;
+        }
+      }
+      
+      // 3. 价格合理性
+      if (currentPrice > 0) {
+        const valid = this._validatePrice(sym, currentPrice);
+        if (!valid) {
+          issues.push('价格超出合理范围');
+          score *= 0.3;
+        }
+      } else {
+        issues.push('无实时价格');
+        score *= 0.5;
+      }
+      
+      // 4. 数据一致性 (简版)
+      if (klines && klines.length > 5) {
+        const last5 = klines.slice(-5);
+        const prices = last5.map(k => k.c);
+        const uniquePrices = new Set(prices.map(p => Math.round(p * 100)));
+        if (uniquePrices.size < 3) {
+          issues.push('价格异常平稳(可能数据冻结)');
+          score *= 0.6;
+        }
+      }
+      
+      score = Math.min(1, Math.max(0, score));
+      
+      return {
+        score,
+        issues,
+        isUsable: score > 0.6,
+        isDegraded: score > 0.3 && score <= 0.6,
+        isUnusable: score <= 0.3,
+        badge: this._getBadge(score),
+        recommendation: this._getRecommendation(score)
+      };
+    },
+    
+    _getMaxAge(tf) {
+      // 日线最多接受3天延迟
+      return 3 * 86400000;
+    },
+    
+    _validatePrice(sym, px) {
+      const ranges = {
+        'BTCUSDT': [10000, 250000],
+        'ETHUSDT': [500, 25000],
+        'SOLUSDT': [10, 3000],
+        'XAU/USD': [1000, 15000],
+        'XAG/USD': [10, 500],
+        'USD/SGD': [1.2, 1.6],
+        'SGD/MYR': [2.5, 4.5],
+        'WTI/USD': [20, 250]
+      };
+      const range = ranges[sym];
+      if (!range) return px > 0 && px < 1e7;
+      return px >= range[0] && px <= range[1];
+    },
+    
+    _getBadge(score) {
+      if (score > 0.8) return { text: '✅ 数据良好', class: 'trust-good' };
+      if (score > 0.6) return { text: '⚠️ 数据可用', class: 'trust-good' };
+      if (score > 0.3) return { text: '🔴 数据较差', class: 'trust-degraded' };
+      return { text: '🚫 数据不可用', class: 'trust-bad' };
+    },
+    
+    _getRecommendation(score) {
+      if (score > 0.8) return '可正常参考';
+      if (score > 0.6) return '建议减半仓位';
+      if (score > 0.3) return '仅作参考,不开新仓';
+      return '停止所有操作';
+    }
+  };
+
+  // ===== 宏观状态引擎 =====
+  const MacroEngine = {
+    assess(kl1d, kl1w) {
+      if (!kl1d || kl1d.length < 50) {
+        return { regime: 'unknown', confidence: 0, label: '数据不足' };
+      }
+      
+      const prices = kl1d.map(k => k.c);
+      const lastPrice = prices[prices.length - 1];
+      
+      // 计算关键MA
+      const ma200 = this._calcSMA(prices, 200);
+      const ma50 = this._calcSMA(prices, 50);
+      
+      // 趋势判断
+      let regime = 'neutral';
+      let confidence = 0.5;
+      let label = '';
+      
+      if (lastPrice > ma200 * 1.2) {
+        regime = 'strong_bull';
+        confidence = 0.7;
+        label = '🟢 强势牛市';
+      } else if (lastPrice > ma200) {
+        if (ma50 > ma200) {
+          regime = 'bull';
+          confidence = 0.65;
+          label = '📈 牛市';
+        } else {
+          regime = 'bull_weakening';
+          confidence = 0.55;
+          label = '🟡 牛市减弱';
+        }
+      } else if (lastPrice < ma200 * 0.8) {
+        regime = 'strong_bear';
+        confidence = 0.7;
+        label = '🔴 强势熊市';
+      } else if (lastPrice < ma200) {
+        if (ma50 < ma200) {
+          regime = 'bear';
+          confidence = 0.65;
+          label = '📉 熊市';
+        } else {
+          regime = 'bear_weakening';
+          confidence = 0.55;
+          label = '🟠 熊市减弱';
+        }
+      } else {
+        regime = 'neutral';
+        confidence = 0.5;
+        label = '⚪ 中性震荡';
+      }
+      
+      // 波动率计算
+      const hv = this._calcHV(prices, 20);
+      
+      // 趋势强度
+      const trendStrength = Math.abs((lastPrice / ma200 - 1) * 100).toFixed(1);
+      
+      // 市场宽度代理 (使用BTC.D)
+      const btcDom = STATE.macro?.btcDom || 50;
+      let breadth = '中性';
+      if (btcDom > 58) breadth = 'BTC主导';
+      if (btcDom < 45) breadth = '山寨季';
+      
+      return {
+        regime,
+        confidence,
+        label,
+        ma200,
+        ma50,
+        lastPrice,
+        hv: hv.toFixed(1) + '%',
+        trendStrength: trendStrength + '%',
+        breadth,
+        color: this._getColor(regime)
+      };
+    },
+    
+    _calcSMA(prices, n) {
+      if (prices.length < n) return prices[prices.length - 1];
+      return prices.slice(-n).reduce((a, b) => a + b, 0) / n;
+    },
+    
+    _calcHV(prices, n) {
+      if (prices.length < n + 1) return 30;
+      const returns = [];
+      for (let i = 1; i <= n; i++) {
+        returns.push(Math.log(prices[prices.length - i] / prices[prices.length - i - 1]));
+      }
+      const mean = returns.reduce((a, b) => a + b, 0) / returns.length;
+      const variance = returns.reduce((s, r) => s + Math.pow(r - mean, 2), 0) / returns.length;
+      return Math.sqrt(variance * 365) * 100;
+    },
+    
+    _getColor(regime) {
+      const map = {
+        'strong_bull': 'var(--green)',
+        'bull': 'var(--green)',
+        'bull_weakening': 'var(--amber)',
+        'neutral': 'var(--text-dim)',
+        'bear_weakening': 'var(--amber)',
+        'bear': 'var(--red)',
+        'strong_bear': 'var(--red)'
+      };
+      return map[regime] || 'var(--text-dim)';
+    }
+  };
+
+  // ===== 微观信号引擎 =====
+  const MicroEngine = {
+    check(kl, price, macroRegime) {
+      if (!kl || kl.length < 30 || !price) {
+        return { hasSignal: false, signal: null };
+      }
+      
+      const prices = kl.map(k => k.c);
+      
+      // RSI
+      const rsi = this._calcRSI(prices, 14);
+      
+      // 成交量比率
+      const volRatio = this._calcVolumeRatio(kl);
+      
+      // 关键位测试
+      const keyLevels = this._findKeyLevels(kl, price);
+      
+      let signal = null;
+      let confidence = 0;
+      let signalText = '无明确信号';
+      
+      // 超卖信号 (RSI < 25 + 放量)
+      if (rsi < 25 && volRatio > 1.3) {
+        signal = 'oversold_bounce';
+        confidence = 0.6;
+        signalText = '🟢 超卖反弹信号 (RSI' + rsi.toFixed(0) + ', 成交量' + volRatio.toFixed(1) + '倍)';
+      }
+      // 超买信号 (RSI > 75 + 放量)
+      else if (rsi > 75 && volRatio > 1.3) {
+        signal = 'overbought_drop';
+        confidence = 0.6;
+        signalText = '🔴 超买回落信号 (RSI' + rsi.toFixed(0) + ', 成交量' + volRatio.toFixed(1) + '倍)';
+      }
+      // 关键位突破信号
+      else if (keyLevels.tests >= 3 && volRatio > 1.5) {
+        signal = 'breakout';
+        confidence = 0.55;
+        signalText = '⚡ 关键位突破信号 (测试' + keyLevels.tests + '次, 放量' + volRatio.toFixed(1) + '倍)';
+      }
+      
+      // 宏观过滤
+      if (signal) {
+        if (signal === 'oversold_bounce' && macroRegime.includes('strong_bear')) {
+          confidence *= 0.5;
+          signalText += ' (熊市反弹谨慎)';
+        }
+        if (signal === 'overbought_drop' && macroRegime.includes('strong_bull')) {
+          confidence *= 0.5;
+          signalText += ' (牛市回调有限)';
+        }
+      }
+      
+      return {
+        hasSignal: signal !== null,
+        signal,
+        confidence: Math.min(0.8, confidence),
+        rsi,
+        volRatio,
+        keyLevels,
+        signalText,
+        actionable: confidence > 0.5
+      };
+    },
+    
+    _calcRSI(prices, n) {
+      if (prices.length < n + 1) return 50;
+      let gains = 0, losses = 0;
+      for (let i = prices.length - n; i < prices.length; i++) {
+        const diff = prices[i] - prices[i-1];
+        if (diff > 0) gains += diff;
+        else losses -= diff;
+      }
+      const avgGain = gains / n;
+      const avgLoss = losses / n;
+      if (avgLoss === 0) return 100;
+      return 100 - 100 / (1 + avgGain / avgLoss);
+    },
+    
+    _calcVolumeRatio(kl) {
+      if (kl.length < 20) return 1;
+      const recent = kl.slice(-5);
+      const avgVol = kl.slice(-20, -5).reduce((s, k) => s + k.v, 0) / 15;
+      const recentAvg = recent.reduce((s, k) => s + k.v, 0) / 5;
+      return recentAvg / (avgVol || 1);
+    },
+    
+    _findKeyLevels(kl, price, tolerance = 0.015) {
+      if (kl.length < 20) return { support: 0, resistance: 0, tests: 0 };
+      
+      const recent = kl.slice(-30);
+      const highs = recent.map(k => k.h);
+      const lows = recent.map(k => k.l);
+      
+      const resistance = Math.max(...highs);
+      const support = Math.min(...lows);
+      
+      // 计算测试次数
+      let tests = 0;
+      recent.forEach(k => {
+        if (Math.abs(k.h - resistance) / resistance < tolerance) tests++;
+        if (Math.abs(k.l - support) / support < tolerance) tests++;
+      });
+      
+      return {
+        support,
+        resistance,
+        tests,
+        supportDist: ((price - support) / price * 100).toFixed(1),
+        resistanceDist: ((resistance - price) / price * 100).toFixed(1)
+      };
+    }
+  };
+
+  // ===== 建议引擎 =====
+  const AdviceEngine = {
+    generate(trust, macro, micro) {
+      // 数据不可用 -> 停止
+      if (trust.isUnusable) {
+        return {
+          action: '停止',
+          reason: '数据不可用: ' + trust.issues.join(', '),
+          position: 0,
+          color: 'var(--red)'
+        };
+      }
+      
+      // 数据降级 -> 减半仓位
+      const positionMultiplier = trust.isDegraded ? 0.5 : 1;
+      
+      // 默认值
+      let action = '等待';
+      let reason = '无明确信号';
+      let position = 0;
+      let color = 'var(--amber)';
+      
+      // 宏观优先决策树
+      if (macro.regime.includes('strong_bull')) {
+        // 强势牛市: 只考虑做多信号
+        if (micro.hasSignal && micro.signal === 'oversold_bounce' && micro.actionable) {
+          action = '轻仓买入';
+          reason = `强势牛市 + 超卖反弹 · ${micro.signalText}`;
+          position = 15;
+        } else {
+          action = '持仓观望';
+          reason = '强势牛市, 等待回调买入机会';
+          position = 10;
+        }
+      }
+      else if (macro.regime.includes('bull')) {
+        // 普通牛市: 需要更强信号
+        if (micro.hasSignal && micro.signal === 'oversold_bounce' && micro.confidence > 0.6) {
+          action = '试探买入';
+          reason = `牛市 + 超卖确认 · ${micro.signalText}`;
+          position = 10;
+        } else {
+          action = '观望';
+          reason = '牛市但无确认信号, 等待';
+          position = 5;
+        }
+      }
+      else if (macro.regime.includes('strong_bear')) {
+        // 强势熊市: 只考虑做空信号
+        if (micro.hasSignal && micro.signal === 'overbought_drop' && micro.actionable) {
+          action = '轻仓做空';
+          reason = `强势熊市 + 超买回落 · ${micro.signalText}`;
+          position = -10;
+        } else {
+          action = '空仓观望';
+          reason = '强势熊市, 不接飞刀';
+          position = 0;
+        }
+      }
+      else if (macro.regime.includes('bear')) {
+        // 普通熊市: 谨慎
+        action = '空仓';
+        reason = '熊市格局, 等待转势';
+        position = 0;
+      }
+      else {
+        // 震荡市: 等待突破
+        if (micro.hasSignal && micro.signal === 'breakout' && micro.confidence > 0.6) {
+          action = '突破跟进';
+          reason = `震荡突破 · ${micro.signalText}`;
+          position = 8;
+        } else {
+          action = '等待';
+          reason = '震荡市, 等待方向选择';
+          position = 0;
+        }
+      }
+      
+      // 应用数据降级
+      position = Math.round(position * positionMultiplier);
+      
+      // 颜色
+      if (position > 0) color = 'var(--green)';
+      else if (position < 0) color = 'var(--red)';
+      else color = 'var(--amber)';
+      
+      // 仓位绝对值显示
+      const positionDisplay = position > 0 ? `多头 ${position}%` : position < 0 ? `空头 ${Math.abs(position)}%` : '0%';
+      
+      return {
+        action,
+        reason,
+        position,
+        positionDisplay,
+        color
+      };
+    }
+  };
+
+  // ===== 数据获取 (模拟/实际) =====
+  async function fetchData(sym) {
+    // 这里是简化版 - 实际使用时替换为真实API调用
+    // 返回模拟数据用于演示
+    return new Promise(resolve => {
+      setTimeout(() => {
+        // 模拟日线数据
+        const basePrice = getSeedPrice(sym);
+        const kl = generateMockDailyKlines(basePrice, 300);
+        
+        resolve({
+          price: basePrice,
+          change: (Math.random() * 4 - 2).toFixed(2),
+          klines: kl
+        });
+      }, 500);
+    });
+  }
+  
+  function getSeedPrice(sym) {
+    const seeds = {
+      'BTCUSDT': 83150,
+      'ETHUSDT': 1850,
+      'SOLUSDT': 125,
+      'XAU/USD': 4998,
+      'XAG/USD': 79.0,
+      'USD/SGD': 1.345,
+      'SGD/MYR': 3.06,
+      'WTI/USD': 98
+    };
+    return seeds[sym] || 1000;
+  }
+  
+  function generateMockDailyKlines(basePrice, count) {
+    const kl = [];
+    const now = Date.now();
+    const dayMs = 86400000;
+    
+    let price = basePrice * 0.9;
+    for (let i = 0; i < count; i++) {
+      const t = now - (count - i) * dayMs;
+      const change = (Math.random() - 0.48) * 0.04;
+      price = price * (1 + change);
+      
+      kl.push({
+        t,
+        o: price * (1 - Math.random() * 0.01),
+        h: price * (1 + Math.random() * 0.02),
+        l: price * (1 - Math.random() * 0.02),
+        c: price,
+        v: Math.random() * 1000000 + 500000
+      });
+    }
+    
+    // 最后一条用basePrice
+      const last = kl[kl.length - 1];
+    last.c = basePrice;
+    last.h = Math.max(last.h, basePrice);
+    last.l = Math.min(last.l, basePrice);
+    
+    return kl;
+  }
+
+  // ===== UI 更新 =====
+  function updateUI() {
+    const trust = STATE.trust;
+    const macro = STATE.macro;
+    const micro = STATE.micro;
+    const advice = STATE.advice;
+    
+    // 价格
+    document.getElementById('priceValue').textContent = STATE.price ? formatPrice(STATE.price) : '--';
+    document.getElementById('priceChange').textContent = STATE.priceChange ? 
+      (STATE.priceChange > 0 ? '+' : '') + STATE.priceChange + '%' : '--';
+    document.getElementById('priceChange').className = STATE.priceChange > 0 ? 'text-green' : 
+                                                       STATE.priceChange < 0 ? 'text-red' : 'text-dim';
+    
+    // 数据可信度
+    document.getElementById('trustScore').textContent = Math.round(trust.score * 100) + '%';
+    document.getElementById('trustBar').style.width = (trust.score * 100) + '%';
+    const badge = trust.badge || { text: '--', class: '' };
+    document.getElementById('trustBadge').textContent = badge.text;
+    document.getElementById('trustBadge').className = 'trust-badge ' + badge.class;
+    document.getElementById('trustIssues').textContent = trust.issues.join(' · ');
+    
+    // 宏观
+    if (macro.label) {
+      document.getElementById('regimeBadge').textContent = macro.label;
+      document.getElementById('regimeBadge').className = 'regime-badge regime-' + macro.regime;
+      document.getElementById('regimeConfidence').textContent = `置信度 ${Math.round(macro.confidence * 100)}%`;
+      document.getElementById('ma200Status').innerHTML = macro.lastPrice ? 
+        `${formatPrice(macro.lastPrice)} / ${formatPrice(macro.ma200)} (${macro.trendStrength})` : '--';
+      document.getElementById('volatility').textContent = macro.hv || '--';
+      document.getElementById('breadth').textContent = macro.breadth || '--';
+      document.getElementById('trendStrength').textContent = macro.trendStrength || '--';
+    }
+    
+    // 微观
+    if (micro.rsi) {
+      document.getElementById('rsiValue').textContent = micro.rsi.toFixed(1);
+      document.getElementById('rsiValue').style.color = 
+        micro.rsi < 30 ? 'var(--green)' : micro.rsi > 70 ? 'var(--red)' : 'inherit';
+      document.getElementById('volumeRatio').textContent = micro.volRatio ? micro.volRatio.toFixed(2) + '×' : '--';
+      
+      if (micro.keyLevels) {
+        document.getElementById('keyLevels').innerHTML = 
+          `支撑: ${formatPrice(micro.keyLevels.support)} (-${micro.keyLevels.supportDist}%) · ` +
+          `阻力: ${formatPrice(micro.keyLevels.resistance)} (+${micro.keyLevels.resistanceDist}%) · ` +
+          `测试: ${micro.keyLevels.tests}次`;
+      }
+      
+      document.getElementById('microSignalText').textContent = micro.signalText || '无明确信号';
+      document.getElementById('microSignal').style.backgroundColor = 
+        micro.signal ? 'rgba(184, 134, 11, 0.1)' : 'rgba(0,0,0,0.02)';
+    }
+    
+    // 支撑阻力
+    if (micro.keyLevels) {
+      document.getElementById('resistance').textContent = formatPrice(micro.keyLevels.resistance);
+      document.getElementById('resistanceNote').textContent = `+${micro.keyLevels.resistanceDist}% from current`;
+      document.getElementById('support').textContent = formatPrice(micro.keyLevels.support);
+      document.getElementById('supportNote').textContent = `-${micro.keyLevels.supportDist}% from current`;
+      
+      const pos = micro.keyLevels.supportDist > 0 ? 
+        `距支撑 ${micro.keyLevels.supportDist}% · 距阻力 ${micro.keyLevels.resistanceDist}%` : '--';
+      document.getElementById('pricePosition').textContent = pos;
+    }
+    
+    // 最终建议
+    document.getElementById('adviceAction').textContent = advice.action;
+    document.getElementById('adviceReason').textContent = advice.reason;
+    document.getElementById('advicePosition').textContent = `建议仓位: ${advice.positionDisplay}`;
+    document.getElementById('finalAdvice').style.borderLeftColor = advice.color;
+    const positionAbs = Math.abs(advice.position);
+    document.getElementById('positionBar').style.width = positionAbs + '%';
+    document.getElementById('positionBar').style.background = advice.color;
+    
+    // 风险管理
+    document.getElementById('riskPosition').textContent = advice.positionDisplay;
+    document.getElementById('riskBar').style.width = positionAbs + '%';
+    document.getElementById('riskBar').style.background = advice.color;
+    document.getElementById('maxLeverage').textContent = '1×'; // 固定1倍
+    document.getElementById('maxPosition').textContent = '15%';
+    
+    // 风险警告
+    const warnings = [];
+    if (trust.isDegraded) warnings.push('⚠️ 数据质量降级, 仓位减半');
+    if (micro.signal && micro.confidence < 0.6) warnings.push('⚠️ 信号置信度偏低');
+    if (macro.regime.includes('bear') && advice.position > 0) warnings.push('⚠️ 熊市做多, 高风险');
+    document.getElementById('riskWarnings').innerHTML = warnings.join('<br>') || '✅ 无主要风险';
+  }
+
+  function formatPrice(p) {
+    if (!p) return '--';
+    if (p > 1000) return p.toFixed(0);
+    if (p > 100) return p.toFixed(1);
+    if (p > 1) return p.toFixed(2);
+    return p.toFixed(4);
+  }
+
+  // ===== 主循环 =====
+  async function refresh() {
+    const sym = document.getElementById('symbolSelect').value;
+    
+    // 获取数据
+    const data = await fetchData(sym);
+    STATE.price = data.price;
+    STATE.priceChange = parseFloat(data.change);
+    STATE.klines['1d'] = data.klines;
+    
+    // 评估数据可信度
+    STATE.trust = TrustEngine.assess(sym, data.klines, data.price);
+    
+    // 只有在数据可用时才进行分析
+    if (STATE.trust.isUsable) {
+      STATE.macro = MacroEngine.assess(data.klines, []);
+      STATE.micro = MicroEngine.check(data.klines, data.price, STATE.macro.regime);
+    } else {
+      STATE.macro = { regime: 'unknown', confidence: 0, label: '数据不足' };
+      STATE.micro = { hasSignal: false, signalText: '数据不足, 无法分析' };
+    }
+    
+    // 生成建议
+    STATE.advice = AdviceEngine.generate(STATE.trust, STATE.macro, STATE.micro);
+    
+    // 更新UI
+    updateUI();
+  }
+
+  // ===== 初始化 =====
+  document.addEventListener('DOMContentLoaded', () => {
+    refresh();
+    
+    // 切换品种
+    document.getElementById('symbolSelect').addEventListener('change', refresh);
+    
+    // 每60秒刷新一次
+    setInterval(refresh, 60000);
+  });
+
+})();
+</script>
+</body>
+</html>
